@@ -4,9 +4,19 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour {
 
-    [SerializeField] private List<Unit> units = new List<Unit>();
+    public static GameManager Instance;
 
-    public List<Unit> Units { get; }
+    [SerializeField] List<Unit> units = new List<Unit>();
+
+    public List<Unit> Units { get => units; }
+
+    void Awake() {
+        if (Instance == null) {
+            Instance = this;
+        } else if (Instance != this) {
+            Destroy(gameObject);
+        }
+    }
 
     // Start is called before the first frame update
     void Start() {

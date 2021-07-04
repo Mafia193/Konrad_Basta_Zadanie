@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour {
 
-    [SerializeField] private Color selectedColor;
-    [SerializeField] private Color unselectedColor;
+    [SerializeField] Color selectedColor;
+    [SerializeField] Color unselectedColor;
 
-    private Renderer renderer;
+    Renderer renderer;
     public bool IsSelected { get; private set; }
 
     // Start is called before the first frame update

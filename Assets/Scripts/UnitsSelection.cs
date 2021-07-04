@@ -8,6 +8,7 @@ public class UnitsSelection : MonoBehaviour {
     [SerializeField] RectTransform selectionBox;
 
     Unit selectedUnit;
+    List<Unit> selectedUnits = new List<Unit>();
 
     Vector2 startPosition;
     float width;
@@ -27,24 +28,13 @@ public class UnitsSelection : MonoBehaviour {
         if (Input.GetMouseButtonDown(0)) {
             startPosition = Input.mousePosition;
             selectionBox.gameObject.SetActive(true);
-
-            if (selectedUnit != null) {
-                selectedUnit.Unselect();
-                selectedUnit = null;
-            }
-
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit)) {
-                selectedUnit = hit.collider.GetComponent<Unit>();
-                if (selectedUnit != null) {
-                    selectedUnit.Select();
-                }
-            }
+            unselectAllUnits();
+            selectOneUnit();
         }
 
         if (Input.GetMouseButton(0)) {
             drawSelectionBox();
+            selectUnits();
         }
 
         if (Input.GetMouseButtonUp(0)) {
@@ -58,5 +48,44 @@ public class UnitsSelection : MonoBehaviour {
 
         selectionBox.sizeDelta = new Vector2(Mathf.Abs(width), Mathf.Abs(height));
         selectionBox.anchoredPosition = new Vector2(startPosition.x + width / 2, startPosition.y + height / 2);
+    }
+
+    void selectOneUnit() {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit)) {
+            selectedUnit = hit.collider.GetComponent<Unit>();
+            if (selectedUnit != null) {
+                selectedUnit.Select();
+            }
+        }
+    }
+
+    void selectUnits() {
+        foreach (Unit unit in GameManager.Instance.Units) {
+            Vector2 screenPosition = Camera.main.WorldToScreenPoint(unit.transform.position);
+
+            Vector2 min = selectionBox.anchoredPosition - selectionBox.sizeDelta / 2;
+            Vector2 max = selectionBox.anchoredPosition + selectionBox.sizeDelta / 2;
+
+            if (screenPosition.x > min.x && screenPosition.x < max.x && screenPosition.y > min.y && screenPosition.y < max.y) {
+                selectedUnits.Add(unit);
+                unit.Select();
+            } else if (unit.IsSelected && unit != selectedUnit) {
+                unit.Unselect();
+            }
+        }
+    }
+
+    void unselectAllUnits() {
+        if (selectedUnit != null) {
+            selectedUnit.Unselect();
+            selectedUnit = null;
+        }
+
+        foreach (Unit unit in selectedUnits)
+            unit.Unselect();
+
+        selectedUnits.Clear();
     }
 }

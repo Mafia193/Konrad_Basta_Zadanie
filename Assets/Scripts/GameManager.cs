@@ -6,9 +6,7 @@ public class GameManager : MonoBehaviour {
 
     public static GameManager Instance;
 
-    List<Unit> units = new List<Unit>();
-
-    public List<Unit> Units { get => units; }
+    public List<Unit> Units { get; private set; } = new List<Unit>();
 
     void Awake() {
         if (Instance == null) {
@@ -29,6 +27,6 @@ public class GameManager : MonoBehaviour {
     }
 
     public void RegisterUnit(Unit unit) {
-        units.Add(unit);
+        Units.Add(unit);
     }
 }

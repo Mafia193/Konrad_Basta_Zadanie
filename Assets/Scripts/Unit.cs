@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Unit : MonoBehaviour {
 
@@ -8,12 +9,14 @@ public class Unit : MonoBehaviour {
     [SerializeField] Color unselectedColor;
 
     Renderer renderer;
+    NavMeshAgent navMeshAgent;
     public bool IsSelected { get; private set; }
 
     // Start is called before the first frame update
     void Start() {
         GameManager.Instance.RegisterUnit(this);
         renderer = GetComponent<Renderer>();
+        navMeshAgent = GetComponent<NavMeshAgent>();
         Unselect();
     }
 
@@ -30,5 +33,9 @@ public class Unit : MonoBehaviour {
     public void Unselect() {
         IsSelected = false;
         renderer.material.color = unselectedColor;
+    }
+
+    public void SetDestination(Vector3 destination) {
+        navMeshAgent.destination = destination;
     }
 }

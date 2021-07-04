@@ -9,11 +9,12 @@ public class UnitsSelection : MonoBehaviour {
     [SerializeField] LayerMask unitLayerMask;
 
     Unit selectedUnit;
-    List<Unit> selectedUnits = new List<Unit>();
+    public List<Unit> selectedUnits { get; private set; } = new List<Unit>();
 
     Vector2 startPosition;
     float width;
     float height;
+    public int SelectionID { get; private set; }
 
     void Awake() {
         Assert.IsNotNull(selectionBox);
@@ -28,6 +29,7 @@ public class UnitsSelection : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         if (Input.GetMouseButtonDown(0)) {
+            ++SelectionID;
             startPosition = Input.mousePosition;
             selectionBox.gameObject.SetActive(true);
             unselectAllUnits();
@@ -58,6 +60,7 @@ public class UnitsSelection : MonoBehaviour {
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, unitLayerMask)) {
             selectedUnit = hit.collider.GetComponent<Unit>();
             selectedUnit.Select();
+            selectedUnits.Add(selectedUnit);
         }
     }
 
@@ -70,24 +73,23 @@ public class UnitsSelection : MonoBehaviour {
 
             if (screenPosition.x > min.x && screenPosition.x < max.x && screenPosition.y > min.y && screenPosition.y < max.y) {
                 if ((unitLayerMask.value & (1 << unit.gameObject.layer)) != 0) {
-                    selectedUnits.Add(unit);
-                    unit.Select();
+                    if (!selectedUnits.Contains(unit)) {
+                        selectedUnits.Add(unit);
+                        unit.Select();
+                    }
                 }
             } else if (unit.IsSelected && unit != selectedUnit) {
                 unit.Unselect();
+                selectedUnits.Remove(unit);
             }
         }
     }
 
     void unselectAllUnits() {
-        if (selectedUnit != null) {
-            selectedUnit.Unselect();
-            selectedUnit = null;
-        }
-
         foreach (Unit unit in selectedUnits)
             unit.Unselect();
 
+        selectedUnit = null;
         selectedUnits.Clear();
     }
 }

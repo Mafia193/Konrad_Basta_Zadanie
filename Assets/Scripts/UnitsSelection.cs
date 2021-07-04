@@ -6,6 +6,7 @@ using UnityEngine.Assertions;
 public class UnitsSelection : MonoBehaviour {
 
     [SerializeField] RectTransform selectionBox;
+    [SerializeField] LayerMask unitLayerMask;
 
     Unit selectedUnit;
     List<Unit> selectedUnits = new List<Unit>();
@@ -16,6 +17,7 @@ public class UnitsSelection : MonoBehaviour {
 
     void Awake() {
         Assert.IsNotNull(selectionBox);
+        Assert.AreNotEqual(0, unitLayerMask, "No layer selected for selecting units.");
     }
 
     // Start is called before the first frame update
@@ -53,24 +55,24 @@ public class UnitsSelection : MonoBehaviour {
     void selectOneUnit() {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit)) {
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, unitLayerMask)) {
             selectedUnit = hit.collider.GetComponent<Unit>();
-            if (selectedUnit != null) {
-                selectedUnit.Select();
-            }
+            selectedUnit.Select();
         }
     }
 
     void selectUnits() {
+        Vector2 min = selectionBox.anchoredPosition - selectionBox.sizeDelta / 2;
+        Vector2 max = selectionBox.anchoredPosition + selectionBox.sizeDelta / 2;
+
         foreach (Unit unit in GameManager.Instance.Units) {
             Vector2 screenPosition = Camera.main.WorldToScreenPoint(unit.transform.position);
 
-            Vector2 min = selectionBox.anchoredPosition - selectionBox.sizeDelta / 2;
-            Vector2 max = selectionBox.anchoredPosition + selectionBox.sizeDelta / 2;
-
             if (screenPosition.x > min.x && screenPosition.x < max.x && screenPosition.y > min.y && screenPosition.y < max.y) {
-                selectedUnits.Add(unit);
-                unit.Select();
+                if ((unitLayerMask.value & (1 << unit.gameObject.layer)) != 0) {
+                    selectedUnits.Add(unit);
+                    unit.Select();
+                }
             } else if (unit.IsSelected && unit != selectedUnit) {
                 unit.Unselect();
             }

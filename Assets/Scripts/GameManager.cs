@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour {
 
     public static GameManager Instance;
 
-    [SerializeField] List<Unit> units = new List<Unit>();
+    List<Unit> units = new List<Unit>();
 
     public List<Unit> Units { get => units; }
 
@@ -26,5 +26,9 @@ public class GameManager : MonoBehaviour {
     // Update is called once per frame
     void Update() {
 
+    }
+
+    public void RegisterUnit(Unit unit) {
+        units.Add(unit);
     }
 }

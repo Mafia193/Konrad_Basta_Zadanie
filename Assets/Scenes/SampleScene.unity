@@ -140,7 +140,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2934320104717123991, guid: 200ff072624f2b546bec8aa3bf06b18c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -8.63
+      value: -5.76
       objectReference: {fileID: 0}
     - target: {fileID: 2934320104717123991, guid: 200ff072624f2b546bec8aa3bf06b18c, type: 3}
       propertyPath: m_LocalPosition.y
@@ -192,7 +192,7 @@ GameObject:
   - component: {fileID: 448480407}
   - component: {fileID: 448480406}
   - component: {fileID: 448480405}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Step (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -284,7 +284,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 516347143}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Stairs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -322,7 +322,7 @@ GameObject:
   - component: {fileID: 616870491}
   - component: {fileID: 616870490}
   - component: {fileID: 616870489}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Step (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -417,7 +417,7 @@ GameObject:
   - component: {fileID: 617009345}
   - component: {fileID: 617009344}
   - component: {fileID: 617009343}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Step (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -605,7 +605,7 @@ GameObject:
   - component: {fileID: 785929410}
   - component: {fileID: 785929409}
   - component: {fileID: 785929408}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Ramp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -920,7 +920,7 @@ GameObject:
   - component: {fileID: 893320210}
   - component: {fileID: 893320209}
   - component: {fileID: 893320208}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1099,7 +1099,7 @@ GameObject:
   - component: {fileID: 1026788776}
   - component: {fileID: 1026788775}
   - component: {fileID: 1026788774}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Step (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1366,6 +1366,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitsSelection: {fileID: 1381103310}
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  Ring: {fileID: 6301876602368284646, guid: 31ea5ab696a44744dba8b4e5a21f8020, type: 3}
 --- !u!1001 &1196697920
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1383,7 +1387,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2934320104717123991, guid: 200ff072624f2b546bec8aa3bf06b18c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -7.41
+      value: -5.24
       objectReference: {fileID: 0}
     - target: {fileID: 2934320104717123991, guid: 200ff072624f2b546bec8aa3bf06b18c, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1527,7 +1531,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1266663424}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Platform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2076,7 +2080,7 @@ GameObject:
   - component: {fileID: 1885214240}
   - component: {fileID: 1885214239}
   - component: {fileID: 1885214238}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Platform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2171,7 +2175,7 @@ GameObject:
   - component: {fileID: 1900757104}
   - component: {fileID: 1900757103}
   - component: {fileID: 1900757102}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Step (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -9,6 +9,7 @@ public class UnitsController : MonoBehaviour {
     [SerializeField] LayerMask layerMask;
     [SerializeField] GameObject Ring;
     [SerializeField] GameObject DirectionRing;
+    [SerializeField] [Range(0f, 0.1f)] float refreshTime = 0.05f;
 
     List<UnitMovementData> unitMoveDatas = new List<UnitMovementData>();
     bool destinationSettingStarted;
@@ -21,6 +22,9 @@ public class UnitsController : MonoBehaviour {
 
     int selectionId;
 
+    Coroutine UpdateEndPosition;
+    Coroutine UpdateEndRotation;
+
     void Awake() {
         Assert.IsNotNull(unitsSelection);
         Assert.IsNotNull(Ring);
@@ -28,11 +32,6 @@ public class UnitsController : MonoBehaviour {
         Assert.AreNotEqual(0, layerMask, "No layer selected for walkable objects.");
     }
 
-    // Start is called before the first frame update
-    void Start() {
-    }
-
-    // Update is called once per frame
     void Update() {
         if (Input.GetMouseButtonDown(1) && !Input.GetMouseButton(0)) {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -54,6 +53,8 @@ public class UnitsController : MonoBehaviour {
                             unitMoveDatas.Add(new UnitMovementData(unit, unit.transform.position - center, Instantiate(Ring) as GameObject, Instantiate(DirectionRing) as GameObject));
                         }
                     }
+
+                    UpdateEndPosition = StartCoroutine(updateEndPositions());
                 }
             }
         }
@@ -61,41 +62,26 @@ public class UnitsController : MonoBehaviour {
         if (destinationSettingStarted && !rotationSettingStarted) {
             if (Input.GetMouseButtonDown(0)) {
                 rotationSettingStarted = true;
+                StopCoroutine(UpdateEndPosition);
                 setDirectionRingsPosition();
                 diactivateRings();
                 activateDirectionRings();
-            } else {
-                if (Input.GetMouseButton(1)) {
-                    drawPositions();
-                } else {
-                    diactivateRings();
-                }
-
-                if (Input.GetMouseButtonUp(1)) {
-                    setUnitsDestination();
-                    destinationSettingStarted = false;
-                }
+                UpdateEndRotation = StartCoroutine(updateEndRotation());
+            } else if (Input.GetMouseButtonUp(1)) {
+                StopCoroutine(UpdateEndPosition);
+                setUnitsDestination();
+                diactivateRings();
+                destinationSettingStarted = false;
             }
         }
 
-        if (rotationSettingStarted) {
-            if (Input.GetMouseButton(0)) {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit)) {
-                    Vector3 rotationVector = (hit.point - destination).normalized;
-                    finalTurn = Quaternion.LookRotation(rotationVector);
-                    setDirectionRingsQuaternion(new Vector3(hit.point.x, 0, hit.point.z));
-                }
-            }
-
-            if (Input.GetMouseButtonUp(0)) {
-                setUnitsDestinationAndRotation();
-                diactivateRings();
-                diactivateDirectionRings();
-                destinationSettingStarted = false;
-                rotationSettingStarted = false;
-            }
+        if (rotationSettingStarted && Input.GetMouseButtonUp(0)) {
+            StopCoroutine(UpdateEndRotation);
+            setUnitsDestinationAndRotation();
+            diactivateRings();
+            diactivateDirectionRings();
+            destinationSettingStarted = false;
+            rotationSettingStarted = false;
         }
     }
 
@@ -106,6 +92,41 @@ public class UnitsController : MonoBehaviour {
         }
         center /= unitsSelection.selectedUnits.Count;
     }
+
+    IEnumerator updateEndPositions() {
+        while (Input.GetMouseButton(1)) {
+            Vector3 movement = Input.mousePosition - startMousePostion;
+            float angle = Vector3.Angle(Vector3.up, movement);
+            Vector3 Angle = new Vector3(0, movement.x > 0 ? angle : -angle, 0);
+
+            for (int i = unitMoveDatas.Count; i > 0;) {
+                UnitMovementData unitData = unitMoveDatas[--i];
+
+                unitData.endPosition = destination + unitData.distanceFromCenter;
+                rotatePointAroundPivot(ref unitData.endPosition, destination, Angle);
+                unitData.setRing(destination.y + 0.01f);
+            }
+            yield return new WaitForSeconds(refreshTime);
+        }
+    }
+
+    void rotatePointAroundPivot(ref Vector3 point, Vector3 pivot, Vector3 angles) {
+        point = Quaternion.Euler(angles) * (point - pivot) + pivot;
+    }
+
+    IEnumerator updateEndRotation() {
+        while (Input.GetMouseButton(0)) {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit)) {
+                Vector3 rotationVector = (hit.point - destination).normalized;
+                finalTurn = Quaternion.LookRotation(rotationVector);
+                setDirectionRingsQuaternion(new Vector3(hit.point.x, 0, hit.point.z));
+            }
+            yield return new WaitForSeconds(refreshTime);
+        }
+    }
+
     void activateRings() {
         foreach (UnitMovementData unitData in unitMoveDatas)
             unitData.ring.SetActive(true);
@@ -136,24 +157,6 @@ public class UnitsController : MonoBehaviour {
             unitData.setDirectionRingQuaternion(point - destination);
     }
 
-    void drawPositions() {
-        Vector3 movement = Input.mousePosition - startMousePostion;
-        float angle = Vector3.Angle(Vector3.up, movement);
-        Vector3 Angle = new Vector3(0, movement.x > 0 ? angle : -angle, 0);
-
-        for (int i = unitMoveDatas.Count; i > 0;) {
-            UnitMovementData unitData = unitMoveDatas[--i];
-
-            unitData.endPosition = destination + unitData.distanceFromCenter;
-            rotatePointAroundPivot(ref unitData.endPosition, destination, Angle);
-            unitData.setRing(destination.y + 0.01f);
-        }
-    }
-
-    void rotatePointAroundPivot(ref Vector3 point, Vector3 pivot, Vector3 angles) {
-        point = Quaternion.Euler(angles) * (point - pivot) + pivot;
-    }
-
     void clearUnitsMovesDatas() {
         foreach (UnitMovementData unitData in unitMoveDatas) {
             Destroy(unitData.ring.gameObject);
@@ -173,9 +176,9 @@ public class UnitsController : MonoBehaviour {
     void setUnitsDestinationAndRotation() {
         for (int i = unitMoveDatas.Count; i > 0;) {
             UnitMovementData unitData = unitMoveDatas[--i];
+            unitData.unit.FinalTurn = finalTurn;
             unitData.unit.SetDestination(unitData.endPosition);
             unitData.distanceFromCenter = unitData.endPosition - destination;
-            unitData.unit.FinalTurn = finalTurn;
         }
     }
 

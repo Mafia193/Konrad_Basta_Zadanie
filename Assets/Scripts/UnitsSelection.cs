@@ -7,6 +7,7 @@ public class UnitsSelection : MonoBehaviour {
 
     [SerializeField] RectTransform selectionBox;
     [SerializeField] LayerMask unitLayerMask;
+    [SerializeField] [Range(0f, 0.1f)] float refreshTime = 0.05f;
 
     Unit selectedUnit;
     public List<Unit> selectedUnits { get; private set; } = new List<Unit>();
@@ -17,17 +18,17 @@ public class UnitsSelection : MonoBehaviour {
     float height;
     public int SelectionID { get; private set; }
 
+    Coroutine SelectionUpdate;
+
     void Awake() {
         Assert.IsNotNull(selectionBox);
         Assert.AreNotEqual(0, unitLayerMask, "No layer selected for selecting units.");
     }
 
-    // Start is called before the first frame update
     void Start() {
         selectionBox.gameObject.SetActive(false);
     }
 
-    // Update is called once per frame
     void Update() {
         if (Input.GetMouseButtonDown(0) && !Input.GetMouseButton(1)) {
             selectionStarted = true;
@@ -36,18 +37,37 @@ public class UnitsSelection : MonoBehaviour {
             selectionBox.gameObject.SetActive(true);
             unselectAllUnits();
             selectOneUnit();
+            SelectionUpdate = StartCoroutine(selectionUpdate());
         }
 
-        if (selectionStarted) {
-            if (Input.GetMouseButton(0)) {
-                drawSelectionBox();
-                selectUnits();
-            }
+        if (selectionStarted && Input.GetMouseButtonUp(0)) {
+            StopCoroutine(SelectionUpdate);
+            selectionBox.gameObject.SetActive(false);
+            selectionStarted = false;
+        }
+    }
 
-            if (Input.GetMouseButtonUp(0)) {
-                selectionBox.gameObject.SetActive(false);
-                selectionStarted = false;
-            }
+    void unselectAllUnits() {
+        foreach (Unit unit in selectedUnits)
+            unit.Unselect();
+
+        selectedUnit = null;
+        selectedUnits.Clear();
+    }
+    void selectOneUnit() {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, unitLayerMask)) {
+            selectedUnit = hit.collider.GetComponent<Unit>();
+            selectedUnit.Select();
+            selectedUnits.Add(selectedUnit);
+        }
+    }
+    IEnumerator selectionUpdate() {
+        while (Input.GetMouseButton(0)) {
+            drawSelectionBox();
+            selectUnits();
+            yield return new WaitForSeconds(refreshTime);
         }
     }
 
@@ -57,16 +77,6 @@ public class UnitsSelection : MonoBehaviour {
 
         selectionBox.sizeDelta = new Vector2(Mathf.Abs(width), Mathf.Abs(height));
         selectionBox.anchoredPosition = new Vector2(startPosition.x + width / 2, startPosition.y + height / 2);
-    }
-
-    void selectOneUnit() {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, unitLayerMask)) {
-            selectedUnit = hit.collider.GetComponent<Unit>();
-            selectedUnit.Select();
-            selectedUnits.Add(selectedUnit);
-        }
     }
 
     void selectUnits() {
@@ -88,13 +98,5 @@ public class UnitsSelection : MonoBehaviour {
                 selectedUnits.Remove(unit);
             }
         }
-    }
-
-    void unselectAllUnits() {
-        foreach (Unit unit in selectedUnits)
-            unit.Unselect();
-
-        selectedUnit = null;
-        selectedUnits.Clear();
     }
 }

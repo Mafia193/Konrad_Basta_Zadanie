@@ -27,7 +27,6 @@ public class Unit : MonoBehaviour {
         GameManager.Instance.RegisterUnit(this);
         renderer = GetComponent<Renderer>();
         navMeshAgent = GetComponent<NavMeshAgent>();
-        navMeshAgent.updateRotation = false;
         Unselect();
         FinalTurn = transform.rotation;
     }

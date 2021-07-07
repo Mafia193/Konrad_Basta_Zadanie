@@ -10,6 +10,7 @@ public class UnitsSelection : MonoBehaviour {
 
     Unit selectedUnit;
     public List<Unit> selectedUnits { get; private set; } = new List<Unit>();
+    bool selectionStarted;
 
     Vector2 startPosition;
     float width;
@@ -28,7 +29,8 @@ public class UnitsSelection : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        if (Input.GetMouseButtonDown(0)) {
+        if (Input.GetMouseButtonDown(0) && !Input.GetMouseButton(1)) {
+            selectionStarted = true;
             ++SelectionID;
             startPosition = Input.mousePosition;
             selectionBox.gameObject.SetActive(true);
@@ -36,13 +38,16 @@ public class UnitsSelection : MonoBehaviour {
             selectOneUnit();
         }
 
-        if (Input.GetMouseButton(0)) {
-            drawSelectionBox();
-            selectUnits();
-        }
+        if (selectionStarted) {
+            if (Input.GetMouseButton(0)) {
+                drawSelectionBox();
+                selectUnits();
+            }
 
-        if (Input.GetMouseButtonUp(0)) {
-            selectionBox.gameObject.SetActive(false);
+            if (Input.GetMouseButtonUp(0)) {
+                selectionBox.gameObject.SetActive(false);
+                selectionStarted = false;
+            }
         }
     }
 

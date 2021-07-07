@@ -11,18 +11,48 @@ public class Unit : MonoBehaviour {
     Renderer renderer;
     NavMeshAgent navMeshAgent;
     public bool IsSelected { get; private set; }
+    bool newTarget;
+    Quaternion finalTurn;
+    public Quaternion FinalTurn {
+        get => finalTurn;
+        set {
+            finalTurn = value;
+            newTarget = true;
+        }
+    }
 
     // Start is called before the first frame update
     void Start() {
         GameManager.Instance.RegisterUnit(this);
         renderer = GetComponent<Renderer>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        navMeshAgent.updateRotation = false;
         Unselect();
+        FinalTurn = transform.rotation;
     }
 
     // Update is called once per frame
     void Update() {
 
+    }
+
+    void LateUpdate() {
+        if (navMeshAgent.velocity.sqrMagnitude > Mathf.Epsilon) {
+            if (!navMeshAgent.updateRotation)
+                navMeshAgent.updateRotation = true;
+        } else if (newTarget) {
+            if (navMeshAgent.updateRotation)
+                navMeshAgent.updateRotation = false;
+
+            float angle = navMeshAgent.angularSpeed / 36 * Time.deltaTime;
+            if (Quaternion.Angle(transform.rotation, finalTurn) < angle) {
+                transform.rotation = finalTurn;
+                newTarget = false;
+                navMeshAgent.updateRotation = true;
+            } else {
+                transform.rotation = Quaternion.Lerp(transform.rotation, finalTurn, angle);
+            }
+        }
     }
 
     public void Select() {

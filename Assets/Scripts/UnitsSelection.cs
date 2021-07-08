@@ -5,18 +5,19 @@ using UnityEngine.Assertions;
 
 public class UnitsSelection : MonoBehaviour {
 
-    [SerializeField] RectTransform selectionBox;
+    [SerializeField] RectTransform selectionBox;    // It is used to sellect units.
     [SerializeField] LayerMask unitLayerMask;
-    [SerializeField] [Range(0f, 0.1f)] float refreshTime = 0.05f;
+    
+    [SerializeField] [Range(0f, 0.1f)] [Tooltip ("The interval between the selectionBox refreshes.")] 
+    float refreshTime = 0.05f;
 
     Unit selectedUnit;
     public List<Unit> selectedUnits { get; private set; } = new List<Unit>();
-    bool selectionStarted;
+    bool selectionStarted;  // Is set when the units selection begins.
 
-    Vector2 startPosition;
-    float width;
-    float height;
-    public int SelectionID { get; private set; }
+    Vector2 startPosition;  // Start point of selectionBox.
+    float width;    // Width selectionBox.
+    float height;   // Height selectionBox.
 
     Coroutine SelectionUpdate;
 
@@ -32,16 +33,16 @@ public class UnitsSelection : MonoBehaviour {
     void Update() {
         if (Input.GetMouseButtonDown(0) && !Input.GetMouseButton(1)) {
             selectionStarted = true;
-            ++SelectionID;
             startPosition = Input.mousePosition;
             selectionBox.gameObject.SetActive(true);
             unselectAllUnits();
-            selectOneUnit();
+            selectOneUnit();    // Allows to choose the unit you click on.
             SelectionUpdate = StartCoroutine(selectionUpdate());
         }
 
         if (selectionStarted && Input.GetMouseButtonUp(0)) {
             StopCoroutine(SelectionUpdate);
+            GameManager.Instance.UpdateUnitsMovementData();
             selectionBox.gameObject.SetActive(false);
             selectionStarted = false;
         }
@@ -80,13 +81,13 @@ public class UnitsSelection : MonoBehaviour {
     }
 
     void selectUnits() {
-        Vector2 min = selectionBox.anchoredPosition - selectionBox.sizeDelta / 2;
+        Vector2 min = selectionBox.anchoredPosition - selectionBox.sizeDelta / 2;   // Borderline points of selectionBox.
         Vector2 max = selectionBox.anchoredPosition + selectionBox.sizeDelta / 2;
 
         foreach (Unit unit in GameManager.Instance.Units) {
             Vector2 screenPosition = Camera.main.WorldToScreenPoint(unit.transform.position);
 
-            if (screenPosition.x > min.x && screenPosition.x < max.x && screenPosition.y > min.y && screenPosition.y < max.y) {
+            if (screenPosition.x > min.x && screenPosition.x < max.x && screenPosition.y > min.y && screenPosition.y < max.y) { // Unit is located inside selectionBox. 
                 if ((unitLayerMask.value & (1 << unit.gameObject.layer)) != 0) {
                     if (!selectedUnits.Contains(unit)) {
                         selectedUnits.Add(unit);
